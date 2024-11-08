@@ -121,7 +121,7 @@ end:
     return 0;
 }
 
-// test.mp4 %03d.bmp
+// output.mp4 %03d.bmp
 int main(int argc, char **argv)
 {
     const char *src, *dst;

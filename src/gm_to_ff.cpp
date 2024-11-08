@@ -34,16 +34,15 @@ end:
     return 0;
 }
 
-// output2.mp4 mpeg4 %03d.png||%03d.bmp 352 288 overlay.png test.json
+// output.mp4 mpeg4 %03d.png||%03d.bmp 352 288 overlay.png test.json
 int main(int argc, char* argv[]) {
 
-    char *dst, *codecname, *format, *overlay_image, *position_json_file;
-    int width, height;
+    char *dst, *codecname, *src, *overlay_image, *position_json_file;
+    int width, height, ret, i;
     struct SwsContext *sws_ctx;
     AVPacket *pkt;
     AVFrame *src_frame, *dst_frame;
     FILE *f;
-    int ret;
     AVCodecContext *ctx;
     const AVCodec* codec;
 
@@ -59,7 +58,7 @@ int main(int argc, char* argv[]) {
 
     dst = argv[1];
     codecname = argv[2];
-    format = argv[3];
+    src = argv[3];
     width = atoi(argv[4]);
     height = atoi(argv[5]);
     overlay_image = argv[6];
@@ -89,6 +88,7 @@ int main(int argc, char* argv[]) {
     if (codec->id == AV_CODEC_ID_H264) {
         av_opt_set(ctx->priv_data, "preset", "slow", 0);
     }
+
     // 编码器与编码器上下文绑定到一起
     ret = avcodec_open2(ctx, codec, NULL);
     if (ret < 0) {
@@ -116,18 +116,17 @@ int main(int argc, char* argv[]) {
     src_frame->height = ctx->height;
     ret = av_frame_get_buffer(src_frame, 0);
     if (ret < 0) {
-        fprintf(stderr, "Could not allocate the video frame data\n");
-        exit(1);
+        av_log(NULL, AV_LOG_ERROR, "Could not allocate the video frame\n");
+        goto err;
     }
 
-    // 设置目标图像帧的参数（YUV420P格式）
-    dst_frame->format = ctx->pix_fmt;
     dst_frame->width = ctx->width;
     dst_frame->height = ctx->height;
+    dst_frame->format = ctx->pix_fmt;
     ret = av_frame_get_buffer(dst_frame, 0);
     if (ret < 0) {
-        fprintf(stderr, "Could not allocate buffer for destination frame\n");
-        exit(1);
+        av_log(NULL, AV_LOG_ERROR, "Could not allocate the video frame\n");
+        goto err;
     }
 
     // 创建AVPacket
@@ -152,18 +151,19 @@ int main(int argc, char* argv[]) {
 
     // 从%03d.png图片获取视频内容
     char img_filename[20];
-    for (int i = 0;; i++) {
-        sprintf(img_filename, format, i + 1);
+    i = 0;
+    while (true) {
+        sprintf(img_filename, src, i + 1);
+
+        // 文件不存在
+        if (access(img_filename, F_OK) != 0) {
+            break;
+        }
 
         ret = av_frame_make_writable(src_frame);
         if (ret < 0){
             av_log(NULL, AV_LOG_ERROR, "error: %s\n", av_err2str(ret));
             goto err;
-        }
-
-        // 文件不存在
-        if (access(img_filename, F_OK) != 0) {
-            break;
         }
 
         Magick::Image background;
@@ -192,6 +192,7 @@ int main(int argc, char* argv[]) {
         if (ret == -1) {
             goto err;
         }
+        i++;
     }
 
     encode(ctx, NULL, pkt, f);

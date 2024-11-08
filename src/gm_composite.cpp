@@ -15,12 +15,9 @@ int main(){
     background.read(background_image); // 替换为您的背景图像文件名
     Magick::Image overlay;
     overlay.read(overlay_image); // 替换为您的要旋转的图像文件名
-//    overlay.backgroundColor(Magick::Color("#ffffffff"));
+    overlay.backgroundColor(Magick::Color("#ffffffff"));
 
     composite_to_frame_plus(&background, &overlay, offsetX, offsetY, degrees);
-//    composite_to_frame(background, overlay, offsetX, offsetY, degrees);
-//    overlay.rotate(degrees); // 角度以度为单位
-//    background.composite(overlay, offsetX, offsetY, Magick::OverCompositeOp);
     background.write(output_image);
     return 0;
 }

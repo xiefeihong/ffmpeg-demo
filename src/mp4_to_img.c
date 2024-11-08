@@ -41,6 +41,7 @@ end:
     return 0;
 }
 
+// output.mp4 %03d
 int main(int argc, char **argv)
 {
     const char *src, *dst;

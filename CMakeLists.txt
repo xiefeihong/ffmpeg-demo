@@ -9,7 +9,7 @@ set(FFMPEG_HOME /usr/local/ffmpeg-6.1.2)
 #set(FFMPEG_HOME /usr/local/ffmpeg-7.1)
 set(GM_HOME /usr/local/GraphicsMagick-1.3.45)
 
-set(FFMPEG_LIB avcodec avutil swresample)
+set(FFMPEG_LIB avcodec avutil)
 set(GM_LIB GraphicsMagick++ GraphicsMagick tiff sharpyuv webp webpmux freetype jpeg png16 Xext X11 xml2 zstd lzma bz2 z m pthread gomp)
 
 include_directories(
@@ -26,6 +26,7 @@ link_directories(
 
 add_executable(mp4_to_img src/mp4_to_img.c)
 add_executable(mp4_to_bmp src/mp4_to_bmp.c)
+add_executable(mp4_to_ppm src/mp4_to_ppm.c)
 add_executable(mp4_to_png src/mp4_to_png.c)
 add_executable(encode_video src/encode_video.c)
 add_executable(img_to_mp4 src/img_to_mp4.c)
@@ -38,11 +39,15 @@ target_link_libraries(mp4_to_img
 )
 
 target_link_libraries(mp4_to_bmp
-        ${FFMPEG_LIB} swscale avformat
+        ${FFMPEG_LIB} avformat swscale
+)
+
+target_link_libraries(mp4_to_ppm
+        ${FFMPEG_LIB} avformat swscale
 )
 
 target_link_libraries(mp4_to_png
-        ${FFMPEG_LIB} swscale avformat
+        ${FFMPEG_LIB} avformat swscale
         png16
 )
 
@@ -51,7 +56,7 @@ target_link_libraries(encode_video
 )
 
 target_link_libraries(img_to_mp4
-        ${FFMPEG_LIB} swscale avformat
+        ${FFMPEG_LIB} avformat swscale
         png16
 )
 
@@ -64,6 +69,6 @@ target_link_libraries(gm_create
 )
 
 target_link_libraries(ffmpeg_demo
-        ${FFMPEG_LIB} swscale avformat
+        ${FFMPEG_LIB} avformat swscale
         ${GM_LIB}
 )

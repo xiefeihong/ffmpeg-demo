@@ -106,11 +106,11 @@ static int decode(AVCodecContext *ctx, AVFrame *frame, AVPacket *pkt, const char
             av_packet_unref(pkt);
         }
     }
-    end:
+end:
     return 0;
 }
 
-// test.mp4 %03d.png
+// output.mp4 %03d.png
 int main(int argc, char **argv) {
     const char *src, *dst;
     int ret = 0;
@@ -128,7 +128,7 @@ int main(int argc, char **argv) {
     ret = avformat_open_input(&fmt_ctx, src, NULL, NULL);
     if (ret < 0) {
         av_log(NULL, AV_LOG_ERROR, "%s\n", av_err2str(ret));
-        exit(-1);
+        goto err;
     }
 
     // 从多媒体文件中找到视频流
